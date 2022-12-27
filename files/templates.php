@@ -1,8 +1,8 @@
 <?php
 	ini_set('error_log', 'error_in_templates.log');
     date_default_timezone_set('Europe/Moscow');
-    // header('Content-type: application/html;charset=utf8');
-    header('Content-type: text/html; charset=utf8');
+    header('Content-type: application/json;charset=utf8');
+//    header('Content-type: text/html; charset=utf8');
 	header('Access-Control-Allow-Origin: *');
 
     include_once 'config.php';
@@ -50,5 +50,45 @@
 
     /* ##################################################################### */
 
+    if ($_POST["method"] === "leads_create" && $Config->CheckToken()) {
+        // перебираем статусы для новый сделок
+        foreach ($_POST['settings']['pipelines'] as $pipeline) {
+            $pipeline = explode('_', $pipeline);
+            $pipeline_ID = (int) $pipeline[1];
+            $status_ID = (int) $pipeline[2];
 
+            // перебираем полученные контакты
+            foreach ($_POST['settings']['contacts'] as $contact_ID) {
+                try {
+                    $contact = $apiClient->contacts()->getOne((int) $contact_ID);
+                    usleep(200);
+                } catch (AmoCRMApiException $e) {}
+
+                // если ответственный не выбран, вытаскиваем из контакта
+                $_POST['settings']['responsible'] === 'false' ?
+                    $responsible_ID = $contact->getResponsibleUserId() :
+                    $responsible_ID = (int) $_POST['settings']['responsible'];
+
+                // создаем сделку
+                $lead = new LeadModel();
+                $lead->setResponsibleUserId($responsible_ID);
+                $lead->setPipelineId($pipeline_ID);
+                $lead->setStatusId($status_ID);
+
+                try {
+                    $lead = $apiClient->leads()->addOne($lead);
+                    usleep(200);
+                } catch (AmoCRMApiException $e) {}
+
+                // привязываем контакт к сделке
+                $links = new LinksCollection();
+                $links->add($contact);
+
+                try {
+                    $apiClient->leads()->link($lead, $links);
+                    usleep(200);
+                } catch (AmoCRMApiException $e) {}
+            }
+        }
+    }
 
