@@ -85,4 +85,4 @@ define(['jquery', 'underscore', 'twigjs', 'lib/components/base/modal'], function
     return CustomWidget_WidgetCopyLeads;
 });
 
-// https://integratorgroup.k-on.ru/andreev/copypaste/token_get.php
+// https://integratorgroup.k-on.ru/andreev/copy_leads/token_get.php
