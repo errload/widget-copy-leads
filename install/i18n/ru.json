@@ -1,0 +1,11 @@
+{
+    "widget": {
+        "name": "Копирование сделок",
+        "short_description": "Копирование сделок",
+        "description": "Копирование сделок",
+        "tour_description": "Копирование сделок"
+    },
+    "settings": {
+        "config_settings": "Настройки"
+    }
+}
