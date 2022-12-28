@@ -7,17 +7,9 @@
 
     include_once 'config.php';
 
-    use AmoCRM\Collections\ContactsCollection;
     use AmoCRM\Collections\LinksCollection;
     use AmoCRM\Exceptions\AmoCRMApiException;
-    use AmoCRM\Models\ContactModel;
-    use AmoCRM\Models\CustomFieldsValues\ValueCollections\NullCustomFieldValueCollection;
     use AmoCRM\Models\LeadModel;
-    use AmoCRM\Helpers\EntityTypesInterface;
-    use AmoCRM\Collections\NotesCollection;
-    use AmoCRM\Collections\TasksCollection;
-    use AmoCRM\Models\TaskModel;
-    use AmoCRM\Filters\TasksFilter;
 
     $Config = new Config();
 

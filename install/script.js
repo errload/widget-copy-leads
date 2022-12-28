@@ -142,7 +142,7 @@ define(['jquery', 'underscore', 'twigjs', 'lib/components/base/modal'], function
                     });
 
                     // pipelines select
-                    var pipelines = Twig({ ref: '/tmpl/controls/pipeline_select/index.twig' }).render({
+                    pipelines = Twig({ ref: '/tmpl/controls/pipeline_select/index.twig' }).render({
                         has_pipelines: true,
                         items: pipelines,
                         multiple: true,
