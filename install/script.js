@@ -8,35 +8,49 @@ define(['jquery', 'underscore', 'twigjs', 'lib/components/base/modal'], function
         /* ######################################################################### */
 
         // функция добавления пункта меню
-        this.addItemMenu = function () {
-            // если не в контактах, пропускаем
-            var list_url = AMOCRM.data.current_list.url;
-            if (list_url !== '/ajax/contacts/list/contacts/') return;
-            // если пункт меню уже создан, пропускаем
-            if ($('.list__top__actions .button-input__context-menu .add__leads').length) return;
+        const addItemMenu = function(mutationsList) {
+            $(function () {
+                // если мы в контактах
+                if (AMOCRM.getWidgetsArea() !== 'contacts') return;
+                if (!AMOCRM.data.current_list || !AMOCRM.data.current_list.url) return;
+                if (AMOCRM.data.current_list.url !== '/ajax/contacts/list/contacts/') return;
 
-            $('.list__top__actions .button-input__context-menu').append(`
-                <li class="button-input__context-menu__item  element__ " id="" style="display:inherit">
-                    <a href="" 
-                        class="js-navigate-link button-input__context-menu__item__link button-input__context-menu__item__inner
-                        add__leads">
-                        
-                        <span class="button-input__context-menu__item__icon-container">
-                            <svg class="svg-icon" viewBox="0 0 20 20">
-                                <path d="M15.475,6.692l-4.084-4.083C11.32,2.538,11.223,2.5,11.125,2.5h-6c-0.413,0-0.75,
-                                    0.337-0.75,0.75v13.5c0,0.412,0.337,0.75,0.75,0.75h9.75c0.412,0,0.75-0.338,0.75-0.75V6.94C15.609,
-                                    6.839,15.554,6.771,15.475,6.692 M11.5,3.779l2.843,2.846H11.5V3.779z M14.875,
-                                    16.75h-9.75V3.25h5.625V7c0,0.206,0.168,0.375,0.375,0.375h3.75V16.75z">
-                                </path>
-                            </svg>
-                        </span>
-                        <span class="button-input__context-menu__item__text">
-                            Создать сделки
-                        </span>
-                    </a>
-                </li>            
-            `);
+                $.each(mutationsList, function () {
+                    if (this.type === 'childList') {
+                        // если пункт меню уже создан, пропускаем
+                        if ($('.list__top__actions .button-input__context-menu .add__leads').length) return;
+
+                        $('.list__top__actions .button-input__context-menu').append(`
+                            <li class="button-input__context-menu__item  element__ " id="" style="display:inherit">
+                                <a href="" 
+                                    class="js-navigate-link button-input__context-menu__item__link button-input__context-menu__item__inner
+                                    add__leads">
+                                    
+                                    <span class="button-input__context-menu__item__icon-container">
+                                        <svg class="svg-icon" viewBox="0 0 20 20">
+                                            <path d="M15.475,6.692l-4.084-4.083C11.32,2.538,11.223,2.5,11.125,2.5h-6c-0.413,0-0.75,
+                                                0.337-0.75,0.75v13.5c0,0.412,0.337,0.75,0.75,0.75h9.75c0.412,0,0.75-0.338,0.75-0.75V6.94C15.609,
+                                                6.839,15.554,6.771,15.475,6.692 M11.5,3.779l2.843,2.846H11.5V3.779z M14.875,
+                                                16.75h-9.75V3.25h5.625V7c0,0.206,0.168,0.375,0.375,0.375h3.75V16.75z">
+                                            </path>
+                                        </svg>
+                                    </span>
+                                    <span class="button-input__context-menu__item__text">
+                                        Создать сделки
+                                    </span>
+                                </a>
+                            </li>            
+                        `);
+
+                        $('.list__top__actions .button-input__context-menu .add__leads').bind('click', self.addLeads);
+                    }
+                });
+
+            });
         }
+
+        // запускаем прослушку элементов
+        this.observerAddItemMenu = new MutationObserver(addItemMenu);
 
         // функция создания сделок
         this.addLeads = function (e) {
@@ -325,16 +339,16 @@ define(['jquery', 'underscore', 'twigjs', 'lib/components/base/modal'], function
                 return true;
             },
             bind_actions: function() {
+                // запускаем прослушку элементов
+                self.observerAddItemMenu.observe($('body')[0], {
+                    childList: true,
+                    subtree: true,
+                    attributes: true
+                });
+
                 return true;
             },
             render: function() {
-                if (AMOCRM.getWidgetsArea() === 'contacts') {
-                    // добавляем пункт в меню
-                    self.addItemMenu();
-                    // и функцию клика по пункту меню
-                    $('.list__top__actions .button-input__context-menu .add__leads').bind('click', self.addLeads);
-                }
-
                 return true;
             },
             contacts: {
