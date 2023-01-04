@@ -3,7 +3,7 @@
         "name": "widget.name",
         "description": "widget.description",
         "short_description": "widget.short_description",
-        "version": "1.0.8",
+        "version": "1.0.11",
         "interface_version": 1,
         "init_once": true,
         "locale": ["ru"],
@@ -14,15 +14,13 @@
         }
     },
     "locations": [
-        "clist",
+        "everywhere",
         "settings"
     ],
     "tour":{
         "is_tour": true,
         "tour_images": {
             "ru": [
-                "/images/logo_main.png",
-                "/images/logo_main.png",
                 "/images/logo_main.png"
             ]
         },

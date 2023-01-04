@@ -64,7 +64,7 @@ define(['jquery', 'underscore', 'twigjs', 'lib/components/base/modal'], function
                     $modal_body
                         .trigger('modal:loaded')
                         .html(`
-                        <div class="modal__main-block" style="width: 100%; min-height: 310px;">
+                        <div class="modal__main-block" style="width: 100%; min-height: 330px;">
                             <h2 class="modal-body__caption head_2">Создать сделки</h2>
                         </div>
                     `)
@@ -142,7 +142,7 @@ define(['jquery', 'underscore', 'twigjs', 'lib/components/base/modal'], function
                     });
 
                     // pipelines select
-                    pipelines = Twig({ ref: '/tmpl/controls/pipeline_select/index.twig' }).render({
+                    var pipelines = Twig({ ref: '/tmpl/controls/pipeline_select/index.twig' }).render({
                         has_pipelines: true,
                         items: pipelines,
                         multiple: true,
@@ -157,53 +157,67 @@ define(['jquery', 'underscore', 'twigjs', 'lib/components/base/modal'], function
             });
 
             // ответственный в сделках
-            var checkbox = Twig({ ref: '/tmpl/controls/checkbox.twig' }).render({
-                class_name: 'modal__responsible-leads',
-                checked: false,
-                value: 'Выбрать ответственного',
-                input_class_name: 'modal__responsible__leads-item',
-                name: 'modal-responsible-leads',
-                text: 'Выбрать ответственного'
-            });
+            var checkboxContact = Twig({ref: '/tmpl/controls/radio.twig'}).render({
+                    prefix: 'checkboxContact',
+                    class_name: 'modal__responsible__leads__contact',
+                    label: 'Указать ответственного из контакта',
+                    name: 'modal-responsible-leads',
+                    value: 'checkboxContact',
+                    selected: true
+                }),
+                checkboxSelect = Twig({ref: '/tmpl/controls/radio.twig'}).render({
+                    prefix: 'checkboxSelect',
+                    class_name: 'modal__responsible__leads__select',
+                    label: 'Выбрать ответственного',
+                    name: 'modal-responsible-leads',
+                    value: 'checkboxSelect',
+                    checked: false
+                });
 
             $('.modal__main-block .modal__pipelines__wrapper').after(`
                 <div class="modal__responsible__wrapper" style="width: 100%; margin-top: 20px;">
-                    ${ checkbox }
+                    ${ checkboxContact }
+                    ${ checkboxSelect }
                 </div>
             `);
 
-            // выбор ответственного
-            $('.modal__responsible__wrapper .control-checkbox').unbind('change');
-            $('.modal__responsible__wrapper .control-checkbox').bind('change', function () {
-                // если чекбокс не checked, удаляем список ответственных
-                if (!$('.modal__responsible__wrapper .control-checkbox').hasClass('is-checked')) {
+            // удаляем пользователей
+            $('.modal__responsible__wrapper .modal__responsible__leads__contact').unbind('change');
+            $('.modal__responsible__wrapper .modal__responsible__leads__contact').bind('change', function () {
+                if ($('.modal__main-block .modal__select__wrapper').length)
                     $('.modal__main-block .modal__select__wrapper').remove();
-                } else {
-                    // иначе добавляем
-                    var managers = [];
+            });
 
-                    $.each(AMOCRM.constant('managers'), function () {
-                        managers.push({ id: this.id, option: this.title });
-                    });
+            // добавляем пользователей
+            $('.modal__responsible__wrapper .modal__responsible__leads__select').unbind('change');
+            $('.modal__responsible__wrapper .modal__responsible__leads__select').bind('change', function () {
+                if ($('.modal__main-block .modal__select__wrapper').length) return;
+                var managers = [];
 
-                    var select = Twig({ ref: '/tmpl/controls/select.twig' }).render({
-                        items: managers,
-                        class_name: 'modal__select-leads'
-                    });
+                $.each(AMOCRM.constant('managers'), function () {
+                    // пропускаем неактивных
+                    if (!this.active) return;
+                    managers.push({ id: this.id, option: this.title });
+                });
 
-                    $('.modal__main-block .modal__responsible__wrapper .modal__responsible-leads').after(`
-                        <div class="modal__select__wrapper" style="width: 100%; margin-top: 10px;">
-                            ${ select }                    
-                        </div>
-                    `);
+                var select = Twig({ ref: '/tmpl/controls/select.twig' }).render({
+                    items: managers,
+                    class_name: 'modal__select-leads'
+                });
 
-                    $('.modal__main-block .modal__select-leads .control--select--button').css('width', '100%');
-                    $('.modal__main-block .modal__select-leads ul').css({
-                        'margin-left': '13px',
-                        'width': 'auto',
-                        'min-width': $('.modal__main-block').outerWidth() - 13
-                    });
-                }
+                $('.modal__main-block .modal__responsible__wrapper .modal__responsible__leads__select').after(`
+                    <div class="modal__select__wrapper" style="width: 100%; margin-top: 10px;">
+                        ${ select }
+                    </div>
+                `);
+
+                // выравниваем селект
+                $('.modal__main-block .modal__responsible__leads__select .control--select--button').css('width', '100%');
+                $('.modal__main-block .modal__responsible__leads__select ul').css({
+                    'margin-left': '13px',
+                    'width': 'auto',
+                    'min-width': $('.modal__main-block').outerWidth() - 13
+                });
             });
 
             // кнопки Сохранить и Отменить
@@ -280,8 +294,8 @@ define(['jquery', 'underscore', 'twigjs', 'lib/components/base/modal'], function
                 } else settings['pipelines'] = pipelines;
 
                 // выбор ответственного
-                if ($('.modal__responsible__wrapper .control-checkbox').hasClass('is-checked')) {
-                    settings['responsible'] = $('.modal__select__wrapper .control--select--button').attr('data-value');
+                if ($('.modal__responsible__wrapper .modal__responsible__leads__select .control-radio').hasClass('icon-radio-checked')) {
+                    settings['responsible'] = $('.modal__main-block .modal__select__wrapper .control--select--button').attr('data-value');
                 } else settings['responsible'] = false;
 
                 if (!is_error) {
